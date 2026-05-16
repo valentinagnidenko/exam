@@ -1,0 +1,45 @@
+const express = require('express');
+const amqp = require('amqplib');
+const cors = require('cors');
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(_dirname));
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+async function start() {
+
+  const connection =
+    await amqp.connect('amqp://rabbitmq');
+
+  const channel =
+    await connection.createChannel();
+
+  await channel.assertQueue('messages');
+
+  app.post('/send', (req, res) => {
+
+    const msg = req.body.message;
+
+    channel.sendToQueue(
+      'messages',
+      Buffer.from(msg)
+    );
+
+    console.log('Sent:', msg);
+
+    res.send('OK');
+
+  });
+
+}
+
+start();
+
+app.listen(3001, () => {
+  console.log('WEB1 started');
+});

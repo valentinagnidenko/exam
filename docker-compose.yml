@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  web1:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./src/web1:/app
+    command: sh -c "npm install express amqplib cors && node server.js"
+    ports:
+      - "3001:3001"
+
+  web2:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./src/web2:/app
+    command: sh -c "npm install express amqplib cors && node server.js"
+    ports:
+      - "3002:3002"
